@@ -1,6 +1,5 @@
 import random as rnd
 import os
-import numpy as np
 
 class Mazo:
     def __init__(self):
@@ -162,9 +161,10 @@ class Ia(Jugador):
             return False
         
     def f(self,x):
+        e = 2.7182818284
         threshold = rnd.uniform(0.3,0.4)-(self.Potenciador/100)
         Nodo = rnd.uniform(12,13)+(self.Potenciador/10)
-        return 100*((1)/(1+np.exp(threshold*(x-Nodo))))    
+        return 100*((1)/(1+e**(threshold*(x-Nodo))))    
 class Crupier(Ia):
     def __init__(self):
         super().__init__(id=10)  
