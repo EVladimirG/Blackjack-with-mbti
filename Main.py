@@ -210,18 +210,30 @@ class Ia(Jugador):
 
     def MbtiAPotenciador(self, Mbti):
         Potenciadores = {
-            "E": {"Pot": rnd.uniform(6.0, 8.0)},
-            "I": {"Pot": rnd.uniform(-9.0, -7.0)},
-            "S": {"Pot": rnd.uniform(-6.0, -2.0)},
-            "N": {"Pot": rnd.uniform(7.0, 9.0)},
-            "T": {"Pot": rnd.uniform(-4.0, -1.0)},
-            "F": {"Pot": rnd.uniform(4.0, 6.0)},
-            "J": {"Pot": rnd.uniform(-8.0, -6.0)},
-            "P": {"Pot": rnd.uniform(3.0, 4.0)},
+            "E": {"Pot": rnd.uniform(5.0, 7.0)},
+            # Extrovertido (Tiende a subir)
+            "I": {"Pot": rnd.uniform(-7.0, -5.0)},
+            # Introvertido (Tiende a bajar)
+            "S": {"Pot": rnd.uniform(-4.0, -2.0)},
+            # Sensorial (ligeramente tiende a bajar)
+            "N": {"Pot": rnd.uniform(5.0, 7.0)},
+            # Intuitivo (Tiende a subir fuerte)
+            "T": {"Pot": rnd.uniform(-3.0, 0.0)},
+            # Pensamiento (neutral-Tiende a bajar)
+            "F": {"Pot": rnd.uniform(0.0, 3.0)},
+            # Sentimiento (neutral-Tiende a subir)
+            "J": {"Pot": rnd.uniform(-5.0, -3.0)},
+            # Juicio (Tiende a bajar)
+            "P": {"Pot": rnd.uniform(3.0, 5.0)},
+            # Percepción (Tiende a subir)
         }
+
         Potenciador = 0
         for Letra in Mbti:
             Potenciador += Potenciadores[Letra]["Pot"]
+
+        # Asegurar que el potenciador esté en el rango [-27, 27]
+        Potenciador = max(min(Potenciador, 27), -27)
         return Potenciador
 
     def DecidirAs(self):
@@ -244,14 +256,16 @@ class Ia(Jugador):
         return 100 * ((1) / (1 + math.e ** (threshold * (x - Nodo))))
 
     def Apostar(self, Recomendado):
-        self.Apuesta = abs(
-            int(
-                self.Saldo
-                / (1 + math.e ** (-0.1) * self.Potenciador)
-                * math.tanh(Recomendado / self.Saldo)
+        porcentaje_riesgo = (self.Potenciador + 27) / 54.0
+        max_porcentaje_saldo = 0.20 + (0.40 * porcentaje_riesgo)
+        apuesta_base = Recomendado * (0.1 + 0.3 * porcentaje_riesgo)
+        self.Apuesta = int(
+            max(
+                min(apuesta_base, self.Saldo * max_porcentaje_saldo, Recomendado * 1.5),
+                Recomendado * 0.05,
             )
         )
-        return self.Apuesta
+        return self.Apuesta * 2.5
 
 
 class Crupier(Ia):
@@ -382,7 +396,7 @@ class Juego:
         print("-----------------------------------------")
         for i in range(n):
             print(
-                f"{f'{self.Jugadores[i].Nombre} -> Jugador eliminado' if self.Jugadores[i].score == -1 else f'{self.Jugadores[i].Mano} >> {self.Jugadores[i].Nombre} (${self.Jugadores[i].Saldo}) >> ({self.Jugadores[i].Apuesta}) >> {f" Mbti: {self.Jugadores[i].mbti}" if self.Jugadores[i].id != 0 or self.Jugadores[i].id == len(self.Jugadores) - 1 else ""} \nSuma: {self.Jugadores[i].score} '}"
+                f"{f'{self.Jugadores[i].Nombre} -> Jugador eliminado' if self.Jugadores[i].score == -1 else f'{self.Jugadores[i].Mano} >> {self.Jugadores[i].Nombre} (${self.Jugadores[i].Saldo}) >> ({self.Jugadores[i].Apuesta}) >> {f" Mbti: {self.Jugadores[i].mbti} (pot = {self.Jugadores[i].Potenciador})" if self.Jugadores[i].id != 0 or self.Jugadores[i].id == len(self.Jugadores) - 1 else ""} \nSuma: {self.Jugadores[i].score} '}"
             )
             print("*******************")
         print("-----------------------------------------")
